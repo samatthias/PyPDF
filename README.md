@@ -9,6 +9,7 @@ A tool for handling PDF files:
 
 Examplex config.
 Please note that all paths must end with slashes.
+~~~
 {
     "configVersion": "1",
     "pdfa_convert_url": "<url>",
@@ -32,3 +33,5 @@ Please note that all paths must end with slashes.
     ]
 
  }
+
+ ~~~
