@@ -9,6 +9,18 @@ A tool for handling PDF files:
 
 Examplex config.
 Please note that all paths must end with slashes.
+
+# Installation guide
+1. Install python version 3.9.2 or higher.
+
+2. Clone this git repository.
+
+~~~
+git clone https://github.com/samatthias/PyPDF.git
+~~~
+
+3. Create config folder directly in the root directory and a config.json file in this directory. The structure of the json config must mucht the one below.
+
 ~~~
 {
     "configVersion": "1",
@@ -34,4 +46,9 @@ Please note that all paths must end with slashes.
 
  }
 
- ~~~
+~~~
+
+
+4. Create virtual python environement.
+
+
