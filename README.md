@@ -49,6 +49,23 @@ git clone https://github.com/samatthias/PyPDF.git
 ~~~
 
 
-4. Create virtual python environement.
+4. Create virtual python environment.
+4.1. Install virtual environment
+~~~
+pip install virtualenv
+~~~
+4.2 Create a virtual environment within the root directory
+~~~
+python -m venv venv
+~~~
+4.3 Activate virtual environment
+~~~
+venv/Scripts/activate.{bat,ps1) for windows
+venv/Scripts/activate.sh for linux
+~~~
 
+5. Install requirements.txt
+~~~
+pip install -r requirements.txt
+~~~
 
