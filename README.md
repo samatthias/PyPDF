@@ -1,7 +1,7 @@
 # PyPDF
 A tool for handling PDF files:
 
-* Script dedects QR codes in top right corner (region of interest) of an DIN A4 page document
+* Script dedects QR codes in top right corner (region of interest) of an DIN A4 pdf document
 * It then finds empty pages and eleminates them
 * It combines alle pages between next QR code found to a single document
 * It then converts pdf to an archive pdf pdf/a-1 and pdf/b-1 (done overy spring boot micro service -not part of this script)
