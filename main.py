@@ -372,7 +372,7 @@ class Runner:
   
 
 
-      url = "http://localhost:8081/convertpdf"
+      url = self.configMicroservice["pdfa_convert_url"]
       #headers = {'Content-Type':'multipart/form-data'}
 
 
@@ -464,8 +464,8 @@ runner.extractRoiImage(documentList)
 runner.extractQrCode(documentList)
 outputDocumentList = runner.mergePdfFiles(documentList)
 runner.convertPdfToArchivePdf(outputDocumentList)
-#runner.cmdLineInput(outputDocumentList)
-#runner.cleanup()
+runner.cmdLineInput(outputDocumentList)
+runner.cleanup()
 
 '''
 #page = Page()
