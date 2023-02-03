@@ -414,11 +414,12 @@ class Runner:
 
     indexSeparator = outputDocument.find("_")+2
     mappingName = outputDocument[indexSeparator:indexSeparator+2]
-    print(mappingName)
-    print(outputDocument[indexSeparator:indexSeparator+1])
+    print("Mapyping name:" + mappingName)
+    print(self.configMicroservice["mappings"][mappingName]["destinationDirectory"])
     
-    for attrs in self.configMicroservice["mappings"]:
-      if attrs["name"] == "RF" or attrs["name"] == "RM":
+    #for attrs in self.configMicroservice["mappings"]:
+
+    if mappingName == "RF" or mappingName == "RP":
         #map = Mapping()sq>a
         #map.setDefaultYear(attrs["name"])
 
@@ -429,7 +430,7 @@ class Runner:
         directoryMonth = outputDocument[indexStartSeparator+1:indexEndSeparator] + "\\"
         print(directoryMonth)
 
-        destinationDirectory = attrs['destinationDirectory'] + directoryMonth 
+        destinationDirectory = self.configMicroservice["mappings"][mappingName]["destinationDirectory"] + directoryMonth 
         print(destinationDirectory)
         sourceFilePath= self.configMicroservice["outputDirectory"] + outputDocument 
         destFileName = str(self.countFilesInDir(destinationDirectory )) + "__a-1.pdf"
@@ -444,9 +445,9 @@ class Runner:
         os.remove(sourceFilePath)
 
       
-      if  attrs["name"] == "AD":
+    elif mappingName == "AD":
 
-        destinationDirectory = attrs['destinationDirectory']
+        destinationDirectory = self.configMicroservice["mappings"][mappingName]["destinationDirectory"]
         destFileName = str(self.countFilesInDir(destinationDirectory )) + "__a-1.pdf"
         destFilePath = destinationDirectory + destFileName
 
@@ -454,9 +455,10 @@ class Runner:
         
         shutil.copy(sourceFilePath, destFilePath)
         os.remove(sourceFilePath)
-      else:
+    else:
         print('No mapping found!')
         mappingName = ""
+
     
 
     
