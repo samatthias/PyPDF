@@ -33,16 +33,15 @@ git clone https://github.com/samatthias/PyPDF.git
     "roiHeightDivider":"6",
     "roiWidthDivider":"3",
     "thresholdEmptyPage":"99.98",
-    "mappings" : [
-        {
-            "name":"<name1>",
+    "mappings" : {
+        "name1": {
             "destinationDirectory":"<destPath>\\"
         },
-        {
-            "name":"<name2>",
+        "name2": {
             "destinationDirectory":"<destPath>\\"
-        }
-    ]
+        },
+        [...]
+    }
 
  }
 
