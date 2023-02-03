@@ -445,7 +445,15 @@ class Runner:
 
       
       if  attrs["name"] == "AD":
-        pass
+
+        destinationDirectory = attrs['destinationDirectory']
+        destFileName = str(self.countFilesInDir(destinationDirectory )) + "__a-1.pdf"
+        destFilePath = destinationDirectory + destFileName
+
+        sourceFilePath= self.configMicroservice["outputDirectory"] + outputDocument
+        
+        shutil.copy(sourceFilePath, destFilePath)
+        os.remove(sourceFilePath)
       else:
         print('No mapping found!')
         mappingName = ""
