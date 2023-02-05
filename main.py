@@ -188,16 +188,28 @@ class Runner:
   
             cropedImage = image.crop(area)
   
-            pageImageRoiFileName = page.getImageFileName()[0:-4]
+            pageImageFileName = page.getImageFileName()[0:-4]
             fileExtension = page.getImageFileName()[-4:]
             print(fileExtension)
-            pageImageRoiFileName = pageImageRoiFileName + "__roi__" + fileExtension
-            pageImageRoiPath = self.configMicroservice["workDirectory"] + "\\" + pageImageRoiFileName
 
-            page.setPageImageRoiFileName(pageImageRoiFileName)
-            print(pageImageRoiFileName)
+            pageImageRoiGrayFileName = pageImageFileName + "__roi-gray__" + fileExtension
+            pageImageRoiGrayPath = self.configMicroservice["workDirectory"] + "\\" + pageImageRoiGrayFileName
+
+            cropedImage.save(pageImageRoiGrayPath)
+
+            cv2GrayImage = cv2.imread(pageImageRoiGrayPath, cv2.IMREAD_GRAYSCALE)
+            (thresh, cv2BinaryImage) = cv2.threshold(cv2GrayImage, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+            pageImageBinaryFileName = pageImageFileName + "__roi-binary__" + fileExtension
+            pageImageBinaryPath = self.configMicroservice["workDirectory"] +  pageImageBinaryFileName
+
+            cv2.imwrite(pageImageBinaryPath,cv2BinaryImage)
+            
+
+            page.setPageImageRoiFileName(pageImageBinaryFileName)
+            #print(pageImageRoiFileName)
   
-            cropedImage.save(pageImageRoiPath)
+            
   
             #print(math.floor(width/3))
             #print(math.floor(height/6))
@@ -215,6 +227,8 @@ class Runner:
       for page in document.getPages():
 
         imageRoiPath = self.configMicroservice["workDirectory"] + "\\" + page.getPageImageRoiFileName()
+		
+        print("Image Roi Path " + imageRoiPath)
   
         imageRoi= cv2.imread(imageRoiPath)
         qrDecoder = cv2.QRCodeDetector()
@@ -223,13 +237,16 @@ class Runner:
         data,bbox,rectifiedImage = qrDecoder.detectAndDecode(imageRoi)
 
         if len(data)>0:
-         print(data)
-         #print("Decoded Data : {}".format(data))
-         page.setQrCodeData(data)
-         #print(page.getQrCodeData())
+          print("Qr code found on image - " + imageRoiPath)
+          print("Data found and read - " + data)
+		 
+		  
+          #print("Decoded Data : {}".format(data))
+          page.setQrCodeData(data)
+          #print(page.getQrCodeData())
         else:
-         print("QR Code not detected")
-         page.setQrCodeData("")
+          print("QR Code not detected")
+          page.setQrCodeData("")
 
     return documentList
 
@@ -253,58 +270,68 @@ class Runner:
 
           inputFilePath = self.configMicroservice["inputDirectory"] + document.getFileName()
           outputTmpFilePath = self.configMicroservice["workDirectory"] + self.configMicroservice["tmpPDFFilename"] 
-
-          print("Doument: " + str(documentIndex))
-          print("Page: " + str(pageIndex))
+          
+          print("-----------------------------------")
+          print("Document Index: " + str(documentIndex))
+          print("Document Count pages: " + str(document.getCountPages()))
+          print("Page Index: " + str(pageIndex))
+          print("QR code data: " + page.getQrCodeData())
+          
 
 
           
           if page.getQrCodeData() != "":
             print("page has qr code - create new document")
 
-            lastQRCodeDocIndex = documentIndex
-            lastQRCodePageIndex = pageIndex
-
-
            # check if there is a tmp file and then movit 
 
             if exists(outputTmpFilePath):
               
-              outputFileName = str(len(outputDocumentList)) + "__" + page.getQrCodeData() + ".pdf"
+              # get the last qr code data from the last doc and page
+              print("Last Document Index: " + str(lastQRCodeDocIndex))
+              print("Last QR Code Index: " + str(lastQRCodePageIndex))
+              lastQRCode = documentList[lastQRCodeDocIndex].getPages()[lastQRCodePageIndex].getQrCodeData()
+              print("Last QR Code data: " + lastQRCode)
+              
 
-              outputFilePath = self.configMicroservice["workDirectory"] 
-              outputFilePath += outputFileName
+              outputFileName = str(len(outputDocumentList)) + "__" + lastQRCode + ".pdf"
+              outputFilePath = self.configMicroservice["workDirectory"] + outputFileName
+
+              print("output file path: " + outputFilePath)
+           
               shutil.copy(outputTmpFilePath, outputFilePath)        
               outputDocumentList.append(outputFileName)
               os.remove(outputTmpFilePath)
 
+            lastQRCodeDocIndex = documentIndex
+            lastQRCodePageIndex = pageIndex              
 
             # just copy pdf file to ouptput directory in new tmp.pdf file
-            if (pageIndex == 1 and document.getCountPages() == 1):
+            if (pageIndex == 0 and document.getCountPages() == 1):
+              print("hopla")
               shutil.copy(inputFilePath, outputTmpFilePath)
+              
   
             # extract from page to new tmp.pdf file
-            else:
-              merger = PdfWriter()
-              outputDocument = open(inputFilePath, "rb")
-              merger.append(fileobj=outputDocument, pages=(pageIndex-1, pageIndex))
-              output = open(outputTmpFilePath, "wb")
-              merger.write(output)
-              # Close File Descriptors
-              outputDocument.close()
-              merger.close()
-              output.close() 
+            #else:
+            #  merger = PdfWriter()
+            #  outputDocument = open(inputFilePath, "rb")
+            #  merger.append(fileobj=outputDocument, pages=(pageIndex-1, pageIndex))
+            #  output = open(outputTmpFilePath, "wb")
+            #  merger.write(output)
+            #  # Close File Descriptors
+            #  outputDocument.close()
+            #  merger.close()
+            #  output.close() 
                
-          print(page.getPageIsEmpty())
+          print("Page empty? " + str(page.getPageIsEmpty()))
           if page.getQrCodeData() == "" and not page.getPageIsEmpty():
              self.helpMerge(inputFilePath, outputTmpFilePath, pageIndex)
 
-        pageIndex = pageIndex + 1
+          pageIndex = pageIndex + 1
         
         documentIndex = documentIndex + 1
     
-
-
 
     
 
