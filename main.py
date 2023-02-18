@@ -2,6 +2,7 @@ import os, json, sys, math, fnmatch, requests
 import cv2
 import numpy as np
 import shutil
+import argparse
 from PyPDF2 import PdfReader
 from PyPDF2 import PdfWriter
 from os import listdir
@@ -391,13 +392,10 @@ class Runner:
   
   
 
-  def convertPdfToArchivePdf(self,outputDocumentList):
+  def convertPdfToArchivePdf(self,outputDocumentList,sourceDirectory):
     for outputDocument in outputDocumentList:
-      inputPdfFilePath = self.configMicroservice["workDirectory"] + outputDocument
+      inputPdfFilePath = sourceDirectory + outputDocument
       inputPdfFile = open(inputPdfFilePath, "rb")
-
-  
-
 
       url = self.configMicroservice["pdfa_convert_url"]
       #headers = {'Content-Type':'multipart/form-data'}
@@ -486,26 +484,69 @@ class Runner:
         print('No mapping found!')
         mappingName = ""
 
-    
+		
+  def readCmdParam(self):
+  #https://docs.python.org/3/library/argparse.html#choices
+  #https://chris48s.github.io/blogmarks/python/2020/12/07/stdin-or-file.html
+    parser = argparse.ArgumentParser(
+        description='A pdf tool to combine, convert and pdf documents with the help of qr codes'
+    )
+
+#    parser.add_argument(
+#        'file',
+#        nargs='?',
+#        help='Input file, if empty stdin is used',
+#        type=argparse.FileType('r'),
+#        default=sys.stdin,
+#    )
+
+    parser.add_argument('-m', '--mode',
+		default='qr',
+        choices=['qr', 'pdfa'],
+		help='Runs PyPDF and find and separate pages with qr codes {qr} or simple convert pdf document found in input folder {pdfa}') 
+					
+    args = parser.parse_args()
+
+    print(args.mode)
+    return args
+   
+	  
+	
+   
+#    if args.file.isatty():
+#        parser.print_help()
+#        return 0
+
+		
+ #   sys.stdout.write(args.file.read())
+ #   return 0
+  
 
     
 
 
 runner = Runner()
+
+args = runner.readCmdParam()
+
 documentList = []
-
 runner.createDocumentList(documentList)
-runner.convertPDFtoImage(documentList)
-runner.findEmptyPages(documentList)
-runner.extractRoiImage(documentList)
-runner.extractQrCode(documentList)
-outputDocumentList = runner.mergePdfFiles(documentList)
-runner.convertPdfToArchivePdf(outputDocumentList)
-runner.cmdLineInput(outputDocumentList)
-runner.cleanup()
 
-'''
-#page = Page()
-#page.setPagePath("C:\\adf\\test2")
-#print(page.getPagePath());
-'''
+if args.mode == 'qr':
+  runner.convertPDFtoImage(documentList)
+  runner.findEmptyPages(documentList)
+  runner.extractRoiImage(documentList)
+  runner.extractQrCode(documentList)
+  outputDocumentList = runner.mergePdfFiles(documentList)
+  runner.convertPdfToArchivePdf(outputDocumentList, runner.configMicroservice["workDirectory"] )
+  runner.cmdLineInput(outputDocumentList)
+  runner.cleanup()
+  
+if args.mode == "pdfa":
+  outputDocumentList = []
+  for document in documentList:
+    outputFilePath =  document.getFileName()
+    outputDocumentList.append(outputFilePath)
+    print(outputFilePath)
+  runner.convertPdfToArchivePdf(outputDocumentList,runner.configMicroservice["inputDirectory"])
+
